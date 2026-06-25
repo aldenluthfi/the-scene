@@ -4,6 +4,9 @@ extends Control
 func _ready() -> void:
 	for item in $ItemTray.get_children():
 		_wire_draggable(item)
+		if item.has_method("update_item_visual"):
+			item.update_item_visual()
+			
 	for panel in $PanelGrid.get_children():
 		var holder := panel.get_node("ItemsHolder")
 		panel.set_drag_forwarding(Callable(), _can_drop_general, _drop_to_container.bind(holder))
@@ -12,31 +15,60 @@ func _ready() -> void:
 
 func _wire_draggable(item: Control) -> void:
 	var is_in_panel := item.get_parent() != $ItemTray
+	if item.has_method("update_item_visual"):
+		item.update_item_visual()
+		
 	if item.get("item_kind") == "character" and is_in_panel:
-		var attachments := item.get_node("Attachments")
-		item.set_drag_forwarding(
-			_drag_from.bind(item),
-			_can_drop_on_character,
-			_drop_to_container.bind(attachments),
-		)
+		var attachments := item.get_node_or_null("Attachments")
+		if attachments:
+			item.set_drag_forwarding(
+				_drag_from.bind(item),
+				_can_drop_on_character,
+				_drop_to_container.bind(attachments),
+			)
+		else:
+			item.set_drag_forwarding(_drag_from.bind(item), Callable(), Callable())
 	else:
 		item.set_drag_forwarding(_drag_from.bind(item), Callable(), Callable())
 
 
 func _drag_from(_at_pos: Vector2, item: Control) -> Variant:
 	var preview := Panel.new()
-	preview.custom_minimum_size = item.size
+	preview.custom_minimum_size = Vector2(80, 80)
 	preview.modulate = Color(1, 1, 1, 0.8)
-	var bg := ColorRect.new()
-	bg.color = item.get("tint")
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	preview.add_child(bg)
+	
+	var room_bg = item.get_node_or_null("RoomBG")
+	var char_container = item.get_node_or_null("CharacterContainer")
+	
+	if room_bg and room_bg.visible and room_bg.texture:
+		var tex := TextureRect.new()
+		tex.texture = room_bg.texture
+		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+		preview.add_child(tex)
+	elif char_container and char_container.visible:
+		var char_left = item.get_node_or_null("CharacterContainer/CharLeft")
+		if char_left and char_left.texture:
+			var tex := TextureRect.new()
+			tex.texture = char_left.texture
+			tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+			preview.add_child(tex)
+	else:
+		var bg := ColorRect.new()
+		bg.color = item.get("tint") if item.get("tint") != null else Color.DARK_GRAY
+		bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+		preview.add_child(bg)
+		
 	var lbl := Label.new()
 	lbl.text = item.get("item_id")
 	lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	preview.add_child(lbl)
+	
 	set_drag_preview(preview)
 	return {"source": item}
 
@@ -49,22 +81,101 @@ func _can_drop_on_character(_at_pos: Vector2, data: Variant) -> bool:
 	if not _can_drop_general(_at_pos, data):
 		return false
 	var kind: String = data.source.get("item_kind")
-	return kind == "hat" or kind == "item"
+	return kind == "hat" or kind == "item" or kind == "role" or kind == "tool"
 
 
 func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> void:
 	var src: Node = data.source
 	var src_parent: Node = src.get_parent()
+	var target_node: Node = src
+	
 	if src_parent == $ItemTray:
 		if container == $ItemTray:
 			return
-		var clone: Node = src.duplicate()
-		container.add_child(clone)
-		_wire_draggable(clone)
+		target_node = src.duplicate()
+		container.add_child(target_node)
 	elif container == $ItemTray:
 		src.queue_free()
+		_check_win.call_deferred()
+		return
 	elif src_parent != container:
 		src.reparent(container)
+	
+	# =========================================================================
+	# LOGIKA DENGAN DEBUGGING UNTUK TRANSFER GAMBAR BACKGROUND
+	# =========================================================================
+	if container != $ItemTray:
+		var current_kind = target_node.get("item_kind")
+		var current_id = target_node.get("item_id")
+		
+		print("\n--- PROSES DROP TERDETEKSI ---")
+		print("Item ID: ", current_id, " | Item Kind: ", current_kind)
+		print("Container Target: ", container.name)
+		
+		if current_kind == "location":
+			print("-> Berhasil masuk blok 'location'!")
+			var panel_box = container.get_parent()
+			
+			if panel_box:
+				print("Panel Induk Ditemukan: ", panel_box.name)
+				var grid_bg = panel_box.get_node_or_null("GridBG")
+				var panel_bg_color = panel_box.get_node_or_null("PanelBg")
+				
+				if grid_bg:
+					print("Node 'GridBG' BERHASIL ditemukan di dalam ", panel_box.name)
+				else:
+					print("ERROR: Node 'GridBG' TIDAK DITEMUKAN di dalam ", panel_box.name, ". Periksa susunan node Tree kamu!")
+				
+				# Menentukan nama file gambar berdasarkan item_id
+				var path_gambar = "res://assets/" + str(current_id) + ".png"
+				print("Mencoba memuat file gambar dari path: ", path_gambar)
+				
+				if ResourceLoader.exists(path_gambar):
+					print("File gambar COCOK dan DITEMUKAN!")
+					if grid_bg:
+						grid_bg.texture = load(path_gambar)
+						print("SUKSES: Gambar ditempelkan ke GridBG!")
+						
+					if panel_bg_color:
+						panel_bg_color.visible = false
+						print("SUKSES: PanelBg (krem polos) disembunyikan.")
+					else:
+						print("Pemberitahuan: Node 'PanelBg' tidak ditemukan untuk disembunyikan.")
+				else:
+					print("ERROR: File '", path_gambar, "' tidak ada di folder assets. Gagal memuat tekstur!")
+			else:
+				print("ERROR: Induk dari container tidak valid!")
+			
+			print("Menghapus sisa node duplikat di pojok...")
+			target_node.queue_free()
+			_check_win.call_deferred()
+			return
+			
+		elif current_kind == "character":
+			# Set ukuran karakter sedikit lebih kecil (lebar 100) agar muat berjejer berdua kesamping
+			target_node.custom_minimum_size = Vector2(100, 120) 
+			
+			# Pastikan objek di dalamnya otomatis berjejer rapi di tengah secara horizontal
+			if container.has_method("set_alignment"):
+				container.alignment = FlowContainer.ALIGNMENT_CENTER
+			
+			# Ganti trik position.y lama dengan menggeser titik awal kontainer induknya (ItemsHolder)
+			# Ini akan menurunkan semua karakter secara serentak tanpa merusak baris kesamping
+			container.position.y = 45.0
+			
+			var char_count := 0
+			for sibling in container.get_children():
+				if sibling.get("item_kind") == "character":
+					char_count += 1
+			
+			var char_right = target_node.get_node_or_null("CharacterContainer/CharRight")
+			var char_left = target_node.get_node_or_null("CharacterContainer/CharLeft")
+			if char_count > 1 and char_right and char_left:
+				char_left.visible = false
+				char_right.visible = true
+				char_right.texture = load("res://assets/" + str(current_id) + ".png")
+	
+	_wire_draggable(target_node)
 	_check_win.call_deferred()
 
 
@@ -97,10 +208,11 @@ func _find_role(holder: Node, hat_id: String) -> Node:
 	for c in holder.get_children():
 		if c.get("item_kind") != "character":
 			continue
-		var attachments := c.get_node("Attachments")
-		for a in attachments.get_children():
-			if a.get("item_kind") == "hat" and a.get("item_id") == hat_id:
-				return c
+		var attachments := c.get_node_or_null("Attachments")
+		if attachments:
+			for a in attachments.get_children():
+				if (a.get("item_kind") == "hat" or a.get("item_kind") == "role") and a.get("item_id") == hat_id:
+					return c
 	return null
 
 
@@ -113,14 +225,18 @@ func _has_anywhere(holder: Node, item_id: String) -> bool:
 		if c.get("item_id") == item_id:
 			return true
 		if c.get("item_kind") == "character":
-			for a in c.get_node("Attachments").get_children():
-				if a.get("item_id") == item_id:
-					return true
+			var attachments := c.get_node_or_null("Attachments")
+			if attachments:
+				for a in attachments.get_children():
+					if a.get("item_id") == item_id:
+						return true
 	return false
 
 
 func _char_holds(character: Node, item_id: String) -> bool:
-	for a in character.get_node("Attachments").get_children():
-		if a.get("item_kind") == "item" and a.get("item_id") == item_id:
-			return true
+	var attachments := character.get_node_or_null("Attachments")
+	if attachments:
+		for a in attachments.get_children():
+			if (a.get("item_kind") == "item" or a.get("item_kind") == "tool") and a.get("item_id") == item_id:
+				return true
 	return false

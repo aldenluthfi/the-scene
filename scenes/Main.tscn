@@ -1,79 +1,105 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://0h41ffpllm2x"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/Item.tscn" id="2_item"]
+[ext_resource type="Script" uid="uid://biqa34gr8tpge" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://dvov65k376kiv" path="res://scenes/Item.tscn" id="2_item"]
+[ext_resource type="Texture2D" uid="uid://lbewwjddlh6x" path="res://assets/bg-Day.png" id="2_rarhs"]
+[ext_resource type="Texture2D" uid="uid://ds14qgifbiou5" path="res://assets/back.png" id="3_c01mt"]
 [ext_resource type="PackedScene" path="res://scenes/Character.tscn" id="3_char"]
+[ext_resource type="Texture2D" uid="uid://lfd6gysrcmnc" path="res://assets/sun.png" id="3_vcsgt"]
 
-[node name="Main" type="Control"]
+[node name="Main" type="Control" unique_id=389801053]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_main")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=414700107]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-color = Color(0.93, 0.84, 0.66, 1)
+texture = ExtResource("2_rarhs")
+expand_mode = 1
 
-[node name="HeaderBar" type="HBoxContainer" parent="."]
+[node name="HeaderBar" type="HBoxContainer" parent="." unique_id=843118420]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_left = 20.0
-offset_top = 14.0
-offset_right = -20.0
-offset_bottom = 60.0
+offset_left = 54.0
+offset_top = 20.0
+offset_right = -65.0
+offset_bottom = 120.0
 theme_override_constants/separation = 12
 
-[node name="BackButton" type="Button" parent="HeaderBar"]
-custom_minimum_size = Vector2(46, 46)
+[node name="BackButton" type="TextureButton" parent="HeaderBar" unique_id=367595013]
+custom_minimum_size = Vector2(80, 80)
 layout_mode = 2
-text = "←"
+texture_normal = ExtResource("3_c01mt")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="Title" type="Label" parent="HeaderBar"]
+[node name="Title" type="Label" parent="HeaderBar" unique_id=137713160]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
 text = "👑 Caught in the Act"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 28
 
-[node name="ThemeButton" type="Button" parent="HeaderBar"]
-custom_minimum_size = Vector2(46, 46)
+[node name="ThemeButton" type="TextureButton" parent="HeaderBar" unique_id=2021795527]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
-text = "☀"
+texture_normal = ExtResource("3_vcsgt")
+ignore_texture_size = true
+stretch_mode = 5
 
-[node name="PanelGrid" type="GridContainer" parent="."]
+[node name="PanelGrid" type="GridContainer" parent="." unique_id=1919132262]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.13
 anchor_top = 0.12
 anchor_right = 0.87
 anchor_bottom = 0.74
-mouse_filter = 1
+offset_top = 33.6
+offset_bottom = 33.600037
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
 columns = 2
 
-[node name="Panel1" type="Panel" parent="PanelGrid"]
+[node name="Panel1" type="Panel" parent="PanelGrid" unique_id=382736941]
 custom_minimum_size = Vector2(450, 210)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel1"]
+[node name="GridBG" type="TextureRect" parent="PanelGrid/Panel1" unique_id=1141375589]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel1" unique_id=1244953854]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0.95, 0.88, 0.74, 1)
 
-[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel1"]
+[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel1" unique_id=2488493]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -82,25 +108,40 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = -10.0
 offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
+alignment = 1
 
-[node name="Panel2" type="Panel" parent="PanelGrid"]
+[node name="Panel2" type="Panel" parent="PanelGrid" unique_id=2131549756]
 custom_minimum_size = Vector2(450, 210)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel2"]
+[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel2" unique_id=632081253]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0.95, 0.88, 0.74, 1)
 
-[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel2"]
+[node name="GridBG" type="TextureRect" parent="PanelGrid/Panel2" unique_id=663969111]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel2" unique_id=1503974442]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -109,25 +150,39 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = -10.0
 offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="Panel3" type="Panel" parent="PanelGrid"]
+[node name="Panel3" type="Panel" parent="PanelGrid" unique_id=1935987248]
 custom_minimum_size = Vector2(450, 210)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel3"]
+[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel3" unique_id=965021352]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0.95, 0.88, 0.74, 1)
 
-[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel3"]
+[node name="GridBG" type="TextureRect" parent="PanelGrid/Panel3/PanelBg" unique_id=385931273]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel3" unique_id=228090914]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -136,25 +191,39 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = -10.0
 offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="Panel4" type="Panel" parent="PanelGrid"]
+[node name="Panel4" type="Panel" parent="PanelGrid" unique_id=1084005731]
 custom_minimum_size = Vector2(450, 210)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel4"]
+[node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel4" unique_id=438858749]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0.95, 0.88, 0.74, 1)
 
-[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel4"]
+[node name="GridBG" type="TextureRect" parent="PanelGrid/Panel4" unique_id=510236832]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel4" unique_id=564409301]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -163,11 +232,13 @@ offset_left = 10.0
 offset_top = 10.0
 offset_right = -10.0
 offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
-[node name="ItemTray" type="HBoxContainer" parent="."]
+[node name="ItemTray" type="HBoxContainer" parent="." unique_id=1526863555]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.79
@@ -175,77 +246,77 @@ anchor_right = 1.0
 anchor_bottom = 0.99
 offset_left = 20.0
 offset_right = -20.0
+theme_override_constants/separation = 20
 alignment = 1
-theme_override_constants/separation = 10
 
-[node name="WardRoom" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="WardRoom" parent="ItemTray" unique_id=1857174160 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "location"
-item_id = "ward room"
-tint = Color(0.78, 0.66, 0.50, 1)
+item_id = "ward-room"
 
-[node name="Daniel" parent="ItemTray" instance=ExtResource("3_char")]
+[node name="Daniel" parent="ItemTray" unique_id=1865058007 instance=ExtResource("3_char")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_id = "daniel"
-tint = Color(0.50, 0.65, 0.92, 1)
 
-[node name="Megan" parent="ItemTray" instance=ExtResource("3_char")]
+[node name="Megan" parent="ItemTray" unique_id=634102422 instance=ExtResource("3_char")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_id = "megan"
-tint = Color(0.50, 0.65, 0.92, 1)
 
-[node name="Laura" parent="ItemTray" instance=ExtResource("3_char")]
+[node name="Laura" parent="ItemTray" unique_id=1820789393 instance=ExtResource("3_char")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_id = "laura"
-tint = Color(0.50, 0.65, 0.92, 1)
 
-[node name="Doctor" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="Doctor" parent="ItemTray" unique_id=1425586939 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "hat"
 item_id = "doctor"
-tint = Color(0.95, 0.60, 0.20, 1)
 
-[node name="Nurse" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="Nurse" parent="ItemTray" unique_id=959706218 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "hat"
 item_id = "nurse"
-tint = Color(0.95, 0.60, 0.20, 1)
 
-[node name="Patient" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="Patient" parent="ItemTray" unique_id=1032563675 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "hat"
 item_id = "patient"
-tint = Color(0.95, 0.60, 0.20, 1)
 
-[node name="Detective" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="Detective" parent="ItemTray" unique_id=106883688 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "hat"
 item_id = "detective"
-tint = Color(0.95, 0.60, 0.20, 1)
 
-[node name="Poison" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="Poison" parent="ItemTray" unique_id=2019189173 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "item"
 item_id = "poison"
-tint = Color(0.85, 0.30, 0.30, 1)
 
-[node name="Handcuff" parent="ItemTray" instance=ExtResource("2_item")]
+[node name="Handcuff" parent="ItemTray" unique_id=1997133918 instance=ExtResource("2_item")]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 item_kind = "item"
 item_id = "handcuff"
-tint = Color(0.85, 0.30, 0.30, 1)
 
-[node name="WinLabel" type="Label" parent="."]
+[node name="WinLabel" type="Label" parent="." unique_id=1896052556]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -257,11 +328,12 @@ offset_left = -240.0
 offset_top = -60.0
 offset_right = 240.0
 offset_bottom = 60.0
-mouse_filter = 2
-text = "MISSION COMPLETE"
-horizontal_alignment = 1
-vertical_alignment = 1
-theme_override_colors/font_color = Color(0.20, 0.55, 0.25, 1)
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.2, 0.55, 0.25, 1)
 theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 56
+text = "MISSION COMPLETE"
+horizontal_alignment = 1
+vertical_alignment = 1
