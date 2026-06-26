@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdoy2lopjoce4"
-path="res://.godot/imported/ward-room.png-b7b9e46d817e41a32a8c2a2850c35ba4.ctex"
+uid="uid://cuf4b7gqtbu47"
+path="res://.godot/imported/Megan.png-cb7b5af3ff5ba215db8be385be58ae9d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ward-room.png"
-dest_files=["res://.godot/imported/ward-room.png-b7b9e46d817e41a32a8c2a2850c35ba4.ctex"]
+source_file="res://assets/characters/Megan.png"
+dest_files=["res://.godot/imported/Megan.png-cb7b5af3ff5ba215db8be385be58ae9d.ctex"]
 
 [params]
 

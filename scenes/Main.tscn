@@ -2,10 +2,9 @@
 
 [ext_resource type="Script" uid="uid://biqa34gr8tpge" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://dvov65k376kiv" path="res://scenes/Item.tscn" id="2_item"]
-[ext_resource type="Texture2D" uid="uid://lbewwjddlh6x" path="res://assets/bg-Day.png" id="2_rarhs"]
-[ext_resource type="Texture2D" uid="uid://ds14qgifbiou5" path="res://assets/back.png" id="3_c01mt"]
-[ext_resource type="PackedScene" path="res://scenes/Character.tscn" id="3_char"]
-[ext_resource type="Texture2D" uid="uid://lfd6gysrcmnc" path="res://assets/sun.png" id="3_vcsgt"]
+[ext_resource type="Texture2D" uid="uid://lbewwjddlh6x" path="res://assets/templates/bg-Day.png" id="2_rarhs"]
+[ext_resource type="Texture2D" uid="uid://ds14qgifbiou5" path="res://assets/navigation/back.png" id="3_c01mt"]
+[ext_resource type="Texture2D" uid="uid://lfd6gysrcmnc" path="res://assets/navigation/sun.png" id="3_vcsgt"]
 
 [node name="Main" type="Control" unique_id=389801053]
 layout_mode = 3
@@ -256,22 +255,19 @@ size_flags_vertical = 4
 item_kind = "location"
 item_id = "ward-room"
 
-[node name="Daniel" parent="ItemTray" unique_id=1865058007 instance=ExtResource("3_char")]
-custom_minimum_size = Vector2(100, 100)
+[node name="Daniel" parent="ItemTray" unique_id=188116441 instance=ExtResource("2_item")]
 layout_mode = 2
-size_flags_vertical = 4
+item_kind = "character"
 item_id = "daniel"
 
-[node name="Megan" parent="ItemTray" unique_id=634102422 instance=ExtResource("3_char")]
-custom_minimum_size = Vector2(100, 100)
+[node name="Megan" parent="ItemTray" unique_id=388278898 instance=ExtResource("2_item")]
 layout_mode = 2
-size_flags_vertical = 4
+item_kind = "character"
 item_id = "megan"
 
-[node name="Laura" parent="ItemTray" unique_id=1820789393 instance=ExtResource("3_char")]
-custom_minimum_size = Vector2(100, 100)
+[node name="Laura" parent="ItemTray" unique_id=558803335 instance=ExtResource("2_item")]
 layout_mode = 2
-size_flags_vertical = 4
+item_kind = "character"
 item_id = "laura"
 
 [node name="Doctor" parent="ItemTray" unique_id=1425586939 instance=ExtResource("2_item")]

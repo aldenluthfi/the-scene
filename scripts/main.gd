@@ -49,9 +49,24 @@ func _drag_from(_at_pos: Vector2, item: Control) -> Variant:
 		preview.add_child(tex)
 	elif char_container and char_container.visible:
 		var char_left = item.get_node_or_null("CharacterContainer/CharLeft")
+		
+		# Jika komponen gambar karakter sudah memuat tekstur, langsung duplikat untuk bayangan drag
 		if char_left and char_left.texture:
 			var tex := TextureRect.new()
 			tex.texture = char_left.texture
+			tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+			preview.add_child(tex)
+		else:
+			# Jika tekstur kosong, buat pemuatan manual dari folder characters yang benar
+			var tex := TextureRect.new()
+			var nama_kapital = str(item.get("item_id")).capitalize()
+			var path_karakter = "res://assets/characters/" + nama_kapital + ".png"
+			
+			if ResourceLoader.exists(path_karakter):
+				tex.texture = load(path_karakter)
+				
 			tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			tex.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -127,7 +142,7 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 					print("ERROR: Node 'GridBG' TIDAK DITEMUKAN di dalam ", panel_box.name, ". Periksa susunan node Tree kamu!")
 				
 				# Menentukan nama file gambar berdasarkan item_id
-				var path_gambar = "res://assets/" + str(current_id) + ".png"
+				var path_gambar = "res://assets/backgrounds/" + str(current_id).replace(" ", "-") + ".png"
 				print("Mencoba memuat file gambar dari path: ", path_gambar)
 				
 				if ResourceLoader.exists(path_gambar):
@@ -152,28 +167,29 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 			return
 			
 		elif current_kind == "character":
-			# Set ukuran karakter sedikit lebih kecil (lebar 100) agar muat berjejer berdua kesamping
-			target_node.custom_minimum_size = Vector2(100, 120) 
+			# Set ukuran kartu kontainer karakter agar pas kesamping
+			target_node.custom_minimum_size = Vector2(80, 80) 
 			
-			# Pastikan objek di dalamnya otomatis berjejer rapi di tengah secara horizontal
-			if container.has_method("set_alignment"):
-				container.alignment = FlowContainer.ALIGNMENT_CENTER
-			
-			# Ganti trik position.y lama dengan menggeser titik awal kontainer induknya (ItemsHolder)
-			# Ini akan menurunkan semua karakter secara serentak tanpa merusak baris kesamping
-			container.position.y = 45.0
+			# PERBAIKAN DI SINI: Beritahu item kalau dia sekarang sudah di-drop ke atas!
+			if target_node.has_method("update_item_visual"):
+				target_node.is_dropped_in_room = true
+				target_node.update_item_visual()
 			
 			var char_count := 0
 			for sibling in container.get_children():
 				if sibling.get("item_kind") == "character":
 					char_count += 1
 			
-			var char_right = target_node.get_node_or_null("CharacterContainer/CharRight")
 			var char_left = target_node.get_node_or_null("CharacterContainer/CharLeft")
+			var char_right = target_node.get_node_or_null("CharacterContainer/CharRight")
+			
 			if char_count > 1 and char_right and char_left:
-				char_left.visible = false
 				char_right.visible = true
-				char_right.texture = load("res://assets/" + str(current_id) + ".png")
+				var nama_kapital = str(current_id).replace(" ", "-").to_lower()
+				# Gunakan file transparan untuk slot kanan jika menumpuk
+				char_right.texture = load("res://assets/characters/" + nama_kapital + "-trans.png")
+				char_right.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				char_right.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	
 	_wire_draggable(target_node)
 	_check_win.call_deferred()

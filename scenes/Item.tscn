@@ -3,11 +3,13 @@
 [ext_resource type="Script" uid="uid://ckvl3dyfe0hvd" path="res://scripts/Item.gd" id="1_item"]
 [ext_resource type="Texture2D" uid="uid://xsarkegdp43n" path="res://scenes/ward-room.png" id="2_bx46p"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qdxu3"]
+
 [node name="Item" type="Panel" unique_id=188116441]
 custom_minimum_size = Vector2(80, 80)
+theme_override_styles/panel = SubResource("StyleBoxEmpty_qdxu3")
 script = ExtResource("1_item")
 item_kind = ""
-tint = Color(0.85, 0.78, 0.62, 1)
 
 [node name="BG" type="TextureRect" parent="." unique_id=734607569]
 layout_mode = 1

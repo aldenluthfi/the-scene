@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lfd6gysrcmnc"
-path="res://.godot/imported/sun.png-96654e2514e117453f5b519ac98c70c7.ctex"
+uid="uid://ugksihsx4h2k"
+path="res://.godot/imported/Kevin-trans.png-8b182748beb07b2dea81a9ea1663a981.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sun.png"
-dest_files=["res://.godot/imported/sun.png-96654e2514e117453f5b519ac98c70c7.ctex"]
+source_file="res://assets/characters/Kevin-trans.png"
+dest_files=["res://.godot/imported/Kevin-trans.png-8b182748beb07b2dea81a9ea1663a981.ctex"]
 
 [params]
 
