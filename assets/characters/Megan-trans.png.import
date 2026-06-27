@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crubd1tmp8vgv"
-path="res://.godot/imported/moon.png-e4c6172be07b31c7ae536c1ad9030dad.ctex"
+uid="uid://d4dwh55wbqc70"
+path="res://.godot/imported/Megan-trans.png-22e093c39feeb193bda10db3e3e754fa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/moon.png"
-dest_files=["res://.godot/imported/moon.png-e4c6172be07b31c7ae536c1ad9030dad.ctex"]
+source_file="res://assets/characters/Megan-trans.png"
+dest_files=["res://.godot/imported/Megan-trans.png-22e093c39feeb193bda10db3e3e754fa.ctex"]
 
 [params]
 

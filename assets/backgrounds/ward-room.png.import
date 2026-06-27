@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfrggbvnxjmmr"
-path="res://.godot/imported/bg-Night.png-293d719f361878429f1d1fe5e79f1545.ctex"
+uid="uid://bdoy2lopjoce4"
+path="res://.godot/imported/ward-room.png-be5a70429d11712305bd06026f959452.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/bg-Night.png"
-dest_files=["res://.godot/imported/bg-Night.png-293d719f361878429f1d1fe5e79f1545.ctex"]
+source_file="res://assets/backgrounds/ward-room.png"
+dest_files=["res://.godot/imported/ward-room.png-be5a70429d11712305bd06026f959452.ctex"]
 
 [params]
 

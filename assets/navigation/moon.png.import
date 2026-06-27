@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lbewwjddlh6x"
-path="res://.godot/imported/bg-Day.png-365066b2bf73c8f0a293f65377e5e475.ctex"
+uid="uid://crubd1tmp8vgv"
+path="res://.godot/imported/moon.png-9e2448215075204a8f09b9b50a98bcc4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/bg-Day.png"
-dest_files=["res://.godot/imported/bg-Day.png-365066b2bf73c8f0a293f65377e5e475.ctex"]
+source_file="res://assets/navigation/moon.png"
+dest_files=["res://.godot/imported/moon.png-9e2448215075204a8f09b9b50a98bcc4.ctex"]
 
 [params]
 
