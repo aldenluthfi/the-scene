@@ -49,8 +49,6 @@ func _drag_from(_at_pos: Vector2, item: Control) -> Variant:
 		preview.add_child(tex)
 	elif char_container and char_container.visible:
 		var char_left = item.get_node_or_null("CharacterContainer/CharLeft")
-		
-		# Jika komponen gambar karakter sudah memuat tekstur, langsung duplikat untuk bayangan drag
 		if char_left and char_left.texture:
 			var tex := TextureRect.new()
 			tex.texture = char_left.texture
@@ -59,14 +57,11 @@ func _drag_from(_at_pos: Vector2, item: Control) -> Variant:
 			tex.set_anchors_preset(Control.PRESET_FULL_RECT)
 			preview.add_child(tex)
 		else:
-			# Jika tekstur kosong, buat pemuatan manual dari folder characters yang benar
 			var tex := TextureRect.new()
 			var nama_kapital = str(item.get("item_id")).capitalize()
 			var path_karakter = "res://assets/characters/" + nama_kapital + ".png"
-			
 			if ResourceLoader.exists(path_karakter):
 				tex.texture = load(path_karakter)
-				
 			tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			tex.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -108,7 +103,12 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 		if container == $ItemTray:
 			return
 		target_node = src.duplicate()
+# Akses property langsung, bukan via get()
+		target_node.item_kind = src.item_kind
+		target_node.item_id = src.item_id
+		print("item_kind dari src.item_kind: '", src.item_kind, "'")
 		container.add_child(target_node)
+		print("Setelah add_child - item_kind: '", target_node.get("item_kind"), "' | item_id: '", target_node.get("item_id"), "'")
 	elif container == $ItemTray:
 		src.queue_free()
 		_check_win.call_deferred()
@@ -116,82 +116,59 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 	elif src_parent != container:
 		src.reparent(container)
 	
-	# =========================================================================
-	# LOGIKA DENGAN DEBUGGING UNTUK TRANSFER GAMBAR BACKGROUND
-	# =========================================================================
 	if container != $ItemTray:
 		var current_kind = target_node.get("item_kind")
 		var current_id = target_node.get("item_id")
-		
-		print("\n--- PROSES DROP TERDETEKSI ---")
-		print("Item ID: ", current_id, " | Item Kind: ", current_kind)
-		print("Container Target: ", container.name)
-		
+
 		if current_kind == "location":
-			print("-> Berhasil masuk blok 'location'!")
+			print("current_kind: '", current_kind, "' | current_id: '", current_id, "'")
 			var panel_box = container.get_parent()
-			
 			if panel_box:
-				print("Panel Induk Ditemukan: ", panel_box.name)
 				var grid_bg = panel_box.get_node_or_null("GridBG")
 				var panel_bg_color = panel_box.get_node_or_null("PanelBg")
-				
-				if grid_bg:
-					print("Node 'GridBG' BERHASIL ditemukan di dalam ", panel_box.name)
-				else:
-					print("ERROR: Node 'GridBG' TIDAK DITEMUKAN di dalam ", panel_box.name, ". Periksa susunan node Tree kamu!")
-				
-				# Menentukan nama file gambar berdasarkan item_id
 				var path_gambar = "res://assets/backgrounds/" + str(current_id).replace(" ", "-") + ".png"
-				print("Mencoba memuat file gambar dari path: ", path_gambar)
-				
 				if ResourceLoader.exists(path_gambar):
-					print("File gambar COCOK dan DITEMUKAN!")
 					if grid_bg:
 						grid_bg.texture = load(path_gambar)
-						print("SUKSES: Gambar ditempelkan ke GridBG!")
-						
+						grid_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+						grid_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+						grid_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 					if panel_bg_color:
 						panel_bg_color.visible = false
-						print("SUKSES: PanelBg (krem polos) disembunyikan.")
-					else:
-						print("Pemberitahuan: Node 'PanelBg' tidak ditemukan untuk disembunyikan.")
-				else:
-					print("ERROR: File '", path_gambar, "' tidak ada di folder assets. Gagal memuat tekstur!")
-			else:
-				print("ERROR: Induk dari container tidak valid!")
-			
-			print("Menghapus sisa node duplikat di pojok...")
 			target_node.queue_free()
 			_check_win.call_deferred()
 			return
-			
+
 		elif current_kind == "character":
-			# Set ukuran kartu kontainer karakter agar pas kesamping
-			target_node.custom_minimum_size = Vector2(80, 80) 
-			
-			# PERBAIKAN DI SINI: Beritahu item kalau dia sekarang sudah di-drop ke atas!
+			target_node.custom_minimum_size = Vector2(80, 80)
 			if target_node.has_method("update_item_visual"):
 				target_node.is_dropped_in_room = true
 				target_node.update_item_visual()
-			
-			var char_count := 0
+
+			# Update semua karakter lain di container agar tidak hilang
 			for sibling in container.get_children():
+				if sibling == target_node:
+					continue
 				if sibling.get("item_kind") == "character":
-					char_count += 1
-			
-			var char_left = target_node.get_node_or_null("CharacterContainer/CharLeft")
-			var char_right = target_node.get_node_or_null("CharacterContainer/CharRight")
-			
-			if char_count > 1 and char_right and char_left:
-				char_right.visible = true
-				var nama_kapital = str(current_id).replace(" ", "-").to_lower()
-				# Gunakan file transparan untuk slot kanan jika menumpuk
-				char_right.texture = load("res://assets/characters/" + nama_kapital + "-trans.png")
-				char_right.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-				char_right.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	
-	_wire_draggable(target_node)
+					sibling.custom_minimum_size = Vector2(80, 80)
+					sibling.is_dropped_in_room = true
+					if sibling.has_method("update_item_visual"):
+						sibling.update_item_visual()
+
+	# Untuk karakter di panel, set drag forwarding tanpa memanggil update_item_visual
+	if target_node.get("item_kind") == "character" and target_node.get_parent() != $ItemTray:
+		var attachments := target_node.get_node_or_null("Attachments")
+		if attachments:
+			target_node.set_drag_forwarding(
+				_drag_from.bind(target_node),
+				_can_drop_on_character,
+				_drop_to_container.bind(attachments),
+			)
+		else:
+			target_node.set_drag_forwarding(_drag_from.bind(target_node), Callable(), Callable())
+	else:
+		_wire_draggable(target_node)
+
 	_check_win.call_deferred()
 
 
