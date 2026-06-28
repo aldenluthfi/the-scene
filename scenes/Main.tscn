@@ -162,6 +162,16 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="GridBG" type="TextureRect" parent="PanelGrid/Panel3" unique_id=385931273]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
 [node name="PanelBg" type="ColorRect" parent="PanelGrid/Panel3" unique_id=965021352]
 layout_mode = 1
 anchors_preset = 15
@@ -171,16 +181,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.95, 0.88, 0.74, 1)
-
-[node name="GridBG" type="TextureRect" parent="PanelGrid/Panel3/PanelBg" unique_id=385931273]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-expand_mode = 1
-stretch_mode = 6
 
 [node name="ItemsHolder" type="HFlowContainer" parent="PanelGrid/Panel3" unique_id=228090914]
 layout_mode = 1
@@ -255,6 +255,18 @@ size_flags_vertical = 4
 item_kind = "location"
 item_id = "ward-room"
 
+[node name="Laboratory" parent="ItemTray" unique_id=301118442 instance=ExtResource("2_item")]
+layout_mode = 2
+size_flags_vertical = 4
+item_kind = "location"
+item_id = "laboratory"
+
+[node name="Office" parent="ItemTray" unique_id=301118443 instance=ExtResource("2_item")]
+layout_mode = 2
+size_flags_vertical = 4
+item_kind = "location"
+item_id = "office"
+
 [node name="Daniel" parent="ItemTray" unique_id=1427413757 instance=ExtResource("2_item")]
 layout_mode = 2
 size_flags_vertical = 4
@@ -313,6 +325,13 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 item_kind = "tool"
 item_id = "handcuff"
+
+[node name="Fingerprint" parent="ItemTray" unique_id=1492725875 instance=ExtResource("2_item")]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+item_kind = "item"
+item_id = "fingerprint"
 
 [node name="WinLabel" type="Label" parent="." unique_id=1896052556]
 visible = false

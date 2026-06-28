@@ -1,16 +1,30 @@
 extends Control
 
+var _level: LevelConfig
+
 
 func _ready() -> void:
+	_level = Levels.get_config(Levels.selected_index)
+	var title := get_node_or_null("HeaderBar/Title")
+	if title:
+		title.text = "👑 " + _level.title
+	var back := get_node_or_null("HeaderBar/BackButton")
+	if back:
+		back.pressed.connect(_on_back_pressed)
+
 	for item in $ItemTray.get_children():
 		_wire_draggable(item)
 		if item.has_method("update_item_visual"):
 			item.update_item_visual()
-			
+
 	for panel in $PanelGrid.get_children():
 		var holder := panel.get_node("ItemsHolder")
 		panel.set_drag_forwarding(Callable(), _can_drop_general, _drop_to_container.bind(holder))
 	$ItemTray.set_drag_forwarding(Callable(), _can_drop_general, _drop_to_container.bind($ItemTray))
+
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/LevelSelect.tscn")
 
 
 func _wire_draggable(item: Control) -> void:
@@ -98,30 +112,30 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 	var src: Node = data.source
 	var src_parent: Node = src.get_parent()
 	var target_node: Node = src
-	
+	var old_owner := _owning_character(src_parent)
+
 	if src_parent == $ItemTray:
 		if container == $ItemTray:
 			return
 		target_node = src.duplicate()
-# Akses property langsung, bukan via get()
 		target_node.item_kind = src.item_kind
 		target_node.item_id = src.item_id
-		print("item_kind dari src.item_kind: '", src.item_kind, "'")
 		container.add_child(target_node)
-		print("Setelah add_child - item_kind: '", target_node.get("item_kind"), "' | item_id: '", target_node.get("item_id"), "'")
 	elif container == $ItemTray:
 		src.queue_free()
+		if old_owner:
+			old_owner.update_item_visual.call_deferred()
 		_check_win.call_deferred()
 		return
 	elif src_parent != container:
 		src.reparent(container)
-	
+
 	if container != $ItemTray:
 		var current_kind = target_node.get("item_kind")
 		var current_id = target_node.get("item_id")
+		var is_attachment := container.name == "Attachments"
 
 		if current_kind == "location":
-			print("current_kind: '", current_kind, "' | current_id: '", current_id, "'")
 			var panel_box = container.get_parent()
 			if panel_box:
 				var grid_bg = panel_box.get_node_or_null("GridBG")
@@ -140,22 +154,39 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 			return
 
 		elif current_kind == "character":
-			target_node.custom_minimum_size = Vector2(80, 80)
+			target_node.custom_minimum_size = Vector2(120, 150)
 			if target_node.has_method("update_item_visual"):
 				target_node.is_dropped_in_room = true
 				target_node.update_item_visual()
 
-			# Update semua karakter lain di container agar tidak hilang
 			for sibling in container.get_children():
 				if sibling == target_node:
 					continue
 				if sibling.get("item_kind") == "character":
-					sibling.custom_minimum_size = Vector2(80, 80)
+					sibling.custom_minimum_size = Vector2(120, 150)
 					sibling.is_dropped_in_room = true
 					if sibling.has_method("update_item_visual"):
 						sibling.update_item_visual()
 
-	# Untuk karakter di panel, set drag forwarding tanpa memanggil update_item_visual
+		elif is_attachment:
+			# Worn hats/held tools aren't shown directly (the character sprite
+			# changes to the matching variation). Keep one hat + one tool max,
+			# replacing any existing attachment of the same category.
+			var new_is_hat: bool = target_node.get("item_kind") in ["hat", "role"]
+			for child in container.get_children():
+				if child == target_node:
+					continue
+				var child_is_hat: bool = child.get("item_kind") in ["hat", "role"]
+				if child_is_hat == new_is_hat:
+					child.queue_free()
+
+	# Refresh the character that just received (or lost) an attachment.
+	var new_owner := _owning_character(container)
+	if new_owner:
+		new_owner.update_item_visual()
+	if old_owner and old_owner != new_owner:
+		old_owner.update_item_visual.call_deferred()
+
 	if target_node.get("item_kind") == "character" and target_node.get_parent() != $ItemTray:
 		var attachments := target_node.get_node_or_null("Attachments")
 		if attachments:
@@ -172,6 +203,15 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 	_check_win.call_deferred()
 
 
+# Returns the character Panel that owns an Attachments container, or null.
+func _owning_character(node: Node) -> Node:
+	if node and node.name == "Attachments":
+		var owner_node := node.get_parent()
+		if owner_node and owner_node.get("item_kind") == "character":
+			return owner_node
+	return null
+
+
 func _check_win() -> void:
 	var ok := 0
 	for i in 4:
@@ -182,24 +222,28 @@ func _check_win() -> void:
 
 func _panel_ok(idx: int) -> bool:
 	var holder := $PanelGrid.get_child(idx).get_node("ItemsHolder")
-	match idx:
-		0:
-			return _has_role(holder, "nurse") and _has_anywhere(holder, "poison")
-		1:
-			return _has_role(holder, "doctor")
-		2:
-			return _has_role(holder, "detective")
-		3:
-			var nurse_char := _find_role(holder, "nurse")
-			return _has_role(holder, "detective") \
-				and nurse_char != null \
-				and _char_holds(nurse_char, "handcuff")
-	return false
+	for c in _level.panel_conditions[idx]:
+		match c.type:
+			PanelCondition.Type.HAS_ROLE:
+				if _find_role(holder, c.role, c.character) == null:
+					return false
+			PanelCondition.Type.HAS_ITEM:
+				if not _has_item_anywhere(holder, c.item):
+					return false
+			PanelCondition.Type.HAS_ROLE_AND_CHAR_HOLDS:
+				var role_char := _find_role(holder, c.role, c.character)
+				if role_char == null or not _char_holds(role_char, c.item):
+					return false
+	return true
 
 
-func _find_role(holder: Node, hat_id: String) -> Node:
+# Finds a character in the holder wearing hat_id. If char_id is set, that
+# character's item_id must match it exactly (e.g. only Megan counts as nurse).
+func _find_role(holder: Node, hat_id: String, char_id: String = "") -> Node:
 	for c in holder.get_children():
 		if c.get("item_kind") != "character":
+			continue
+		if char_id != "" and c.get("item_id") != char_id:
 			continue
 		var attachments := c.get_node_or_null("Attachments")
 		if attachments:
@@ -209,11 +253,7 @@ func _find_role(holder: Node, hat_id: String) -> Node:
 	return null
 
 
-func _has_role(holder: Node, hat_id: String) -> bool:
-	return _find_role(holder, hat_id) != null
-
-
-func _has_anywhere(holder: Node, item_id: String) -> bool:
+func _has_item_anywhere(holder: Node, item_id: String) -> bool:
 	for c in holder.get_children():
 		if c.get("item_id") == item_id:
 			return true

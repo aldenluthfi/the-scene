@@ -1,17 +1,16 @@
 [gd_scene format=3 uid="uid://dvov65k376kiv"]
 
 [ext_resource type="Script" uid="uid://ckvl3dyfe0hvd" path="res://scripts/Item.gd" id="1_item"]
-[ext_resource type="Texture2D" uid="uid://xsarkegdp43n" path="res://scenes/ward-room.png" id="2_bx46p"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qdxu3"]
 
 [node name="Item" type="Panel" unique_id=188116441]
-custom_minimum_size = Vector2(80, 80)
+custom_minimum_size = Vector2(68, 68)
 theme_override_styles/panel = SubResource("StyleBoxEmpty_qdxu3")
 script = ExtResource("1_item")
 item_kind = ""
 
-[node name="BG" type="TextureRect" parent="." unique_id=734607569]
+[node name="BG" type="ColorRect" parent="." unique_id=734607569]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,9 +18,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("2_bx46p")
-expand_mode = 1
-stretch_mode = 6
+color = Color(0, 0, 0, 0)
 
 [node name="RoomBG" type="TextureRect" parent="." unique_id=645459510]
 layout_mode = 1
@@ -30,6 +27,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 expand_mode = 1
 stretch_mode = 6
 
@@ -40,19 +38,36 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 alignment = 1
 
 [node name="CharLeft" type="TextureRect" parent="CharacterContainer" unique_id=578161751]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
 [node name="CharRight" type="TextureRect" parent="CharacterContainer" unique_id=355183354]
+visible = false
 layout_mode = 2
-size_flags_horizontal = 3
+mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
+
+[node name="Attachments" type="HFlowContainer" parent="." unique_id=1772019283]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.35
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+alignment = 1
 
 [node name="ToolIcon" type="TextureRect" parent="." unique_id=344505572]
 layout_mode = 1
@@ -62,8 +77,19 @@ anchor_right = 1.0
 offset_left = -40.0
 offset_bottom = 40.0
 grow_horizontal = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="." unique_id=943853328]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -22.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
