@@ -105,7 +105,7 @@ func _can_drop_on_character(_at_pos: Vector2, data: Variant) -> bool:
 	if not _can_drop_general(_at_pos, data):
 		return false
 	var kind: String = data.source.get("item_kind")
-	return kind == "hat" or kind == "item" or kind == "role" or kind == "tool"
+	return kind in ["hat", "item", "role", "tool"]
 
 
 func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> void:
@@ -125,7 +125,7 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 		src.queue_free()
 		if old_owner:
 			old_owner.update_item_visual.call_deferred()
-		_check_win.call_deferred()
+		_refresh_all_visuals()
 		return
 	elif src_parent != container:
 		src.reparent(container)
@@ -150,7 +150,7 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 					if panel_bg_color:
 						panel_bg_color.visible = false
 			target_node.queue_free()
-			_check_win.call_deferred()
+			_refresh_all_visuals()
 			return
 
 		elif current_kind == "character":
@@ -169,8 +169,7 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 						sibling.update_item_visual()
 
 		elif is_attachment:
-			# Worn hats/held tools aren't shown directly (the character sprite
-			# changes to the matching variation). Keep one hat + one tool max,
+			# Worn hats/held tools aren't shown directly. Keep one hat + one tool max,
 			# replacing any existing attachment of the same category.
 			var new_is_hat: bool = target_node.get("item_kind") in ["hat", "role"]
 			for child in container.get_children():
@@ -200,7 +199,20 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 	else:
 		_wire_draggable(target_node)
 
+	_refresh_all_visuals()
+
+
+# Menyegarkan seluruh visual kamar, kondisi menang, dan efek komik secara sekuensial
+func _refresh_all_visuals() -> void:
+	for panel in $PanelGrid.get_children():
+		var holder = panel.get_node_or_null("ItemsHolder")
+		if holder:
+			for child in holder.get_children():
+				if child.has_method("update_item_visual"):
+					child.update_item_visual()
+					
 	_check_win.call_deferred()
+	_update_story_effects.call_deferred()
 
 
 # Returns the character Panel that owns an Attachments container, or null.
@@ -221,24 +233,32 @@ func _check_win() -> void:
 
 
 func _panel_ok(idx: int) -> bool:
+	if idx >= _level.panel_conditions.size():
+		return false
+		
 	var holder := $PanelGrid.get_child(idx).get_node("ItemsHolder")
 	for c in _level.panel_conditions[idx]:
-		match c.type:
+		var condition_type = c.get("type") if c is Dictionary else c.type
+		var role_id = c.get("role", "") if c is Dictionary else c.role
+		var char_id = c.get("character", "") if c is Dictionary else c.character
+		var item_id = c.get("item", "") if c is Dictionary else c.item
+
+		match condition_type:
 			PanelCondition.Type.HAS_ROLE:
-				if _find_role(holder, c.role, c.character) == null:
+				if _find_role(holder, role_id, char_id) == null:
 					return false
 			PanelCondition.Type.HAS_ITEM:
-				if not _has_item_anywhere(holder, c.item):
+				if not _has_item_anywhere(holder, item_id):
 					return false
 			PanelCondition.Type.HAS_ROLE_AND_CHAR_HOLDS:
-				var role_char := _find_role(holder, c.role, c.character)
-				if role_char == null or not _char_holds(role_char, c.item):
+				var role_char := _find_role(holder, role_id, char_id)
+				if role_char == null or not _char_holds(role_char, item_id):
 					return false
 	return true
 
 
 # Finds a character in the holder wearing hat_id. If char_id is set, that
-# character's item_id must match it exactly (e.g. only Megan counts as nurse).
+# character's item_id must match it exactly.
 func _find_role(holder: Node, hat_id: String, char_id: String = "") -> Node:
 	for c in holder.get_children():
 		if c.get("item_kind") != "character":
@@ -248,7 +268,7 @@ func _find_role(holder: Node, hat_id: String, char_id: String = "") -> Node:
 		var attachments := c.get_node_or_null("Attachments")
 		if attachments:
 			for a in attachments.get_children():
-				if (a.get("item_kind") == "hat" or a.get("item_kind") == "role") and a.get("item_id") == hat_id:
+				if a.get("item_kind") in ["hat", "role"] and a.get("item_id") == hat_id:
 					return c
 	return null
 
@@ -270,6 +290,18 @@ func _char_holds(character: Node, item_id: String) -> bool:
 	var attachments := character.get_node_or_null("Attachments")
 	if attachments:
 		for a in attachments.get_children():
-			if (a.get("item_kind") == "item" or a.get("item_kind") == "tool") and a.get("item_id") == item_id:
+			if a.get("item_kind") in ["item", "tool"] and a.get("item_id") == item_id:
 				return true
 	return false
+
+
+func _update_story_effects() -> void:
+	var panel_4 := $PanelGrid.get_child(3) if $PanelGrid.get_child_count() > 3 else null
+	if not panel_4:
+		return
+		
+	var objection_node := panel_4.get_node_or_null("ObjectionLabel")
+	if objection_node:
+		var is_condition_met: bool = _panel_ok(3)
+		if objection_node.visible != is_condition_met:
+			objection_node.visible = is_condition_met
