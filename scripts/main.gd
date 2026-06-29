@@ -1,16 +1,30 @@
 extends Control
 
+var _level: LevelConfig
+
 
 func _ready() -> void:
+	_level = Levels.get_config(Levels.selected_index)
+	var title := get_node_or_null("HeaderBar/Title")
+	if title:
+		title.text = "👑 " + _level.title
+	var back := get_node_or_null("HeaderBar/BackButton")
+	if back:
+		back.pressed.connect(_on_back_pressed)
+
 	for item in $ItemTray.get_children():
 		_wire_draggable(item)
 		if item.has_method("update_item_visual"):
 			item.update_item_visual()
-			
+
 	for panel in $PanelGrid.get_children():
 		var holder := panel.get_node("ItemsHolder")
 		panel.set_drag_forwarding(Callable(), _can_drop_general, _drop_to_container.bind(holder))
 	$ItemTray.set_drag_forwarding(Callable(), _can_drop_general, _drop_to_container.bind($ItemTray))
+
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/LevelSelect.tscn")
 
 
 func _wire_draggable(item: Control) -> void:
@@ -98,36 +112,30 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 	var src: Node = data.source
 	var src_parent: Node = src.get_parent()
 	var target_node: Node = src
-	
+	var old_owner := _owning_character(src_parent)
+
 	if src_parent == $ItemTray:
 		if container == $ItemTray:
 			return
 		target_node = src.duplicate()
-# Akses property langsung, bukan via get()
 		target_node.item_kind = src.item_kind
 		target_node.item_id = src.item_id
-		print("item_kind dari src.item_kind: '", src.item_kind, "'")
 		container.add_child(target_node)
-		print("Setelah add_child - item_kind: '", target_node.get("item_kind"), "' | item_id: '", target_node.get("item_id"), "'")
 	elif container == $ItemTray:
 		src.queue_free()
-<<<<<<< Updated upstream
-		_check_win.call_deferred()
-=======
 		if old_owner:
 			old_owner.update_item_visual.call_deferred()
 		_refresh_all_visuals()
->>>>>>> Stashed changes
 		return
 	elif src_parent != container:
 		src.reparent(container)
-	
+
 	if container != $ItemTray:
 		var current_kind = target_node.get("item_kind")
 		var current_id = target_node.get("item_id")
+		var is_attachment := container.name == "Attachments"
 
 		if current_kind == "location":
-			print("current_kind: '", current_kind, "' | current_id: '", current_id, "'")
 			var panel_box = container.get_parent()
 			if panel_box:
 				var grid_bg = panel_box.get_node_or_null("GridBG")
@@ -146,25 +154,23 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 			return
 
 		elif current_kind == "character":
-			target_node.custom_minimum_size = Vector2(80, 80)
+			target_node.custom_minimum_size = Vector2(120, 150)
 			if target_node.has_method("update_item_visual"):
 				target_node.is_dropped_in_room = true
 				target_node.update_item_visual()
 
-			# Update semua karakter lain di container agar tidak hilang
 			for sibling in container.get_children():
 				if sibling == target_node:
 					continue
 				if sibling.get("item_kind") == "character":
-					sibling.custom_minimum_size = Vector2(80, 80)
+					sibling.custom_minimum_size = Vector2(120, 150)
 					sibling.is_dropped_in_room = true
 					if sibling.has_method("update_item_visual"):
 						sibling.update_item_visual()
 
-<<<<<<< Updated upstream
-	# Untuk karakter di panel, set drag forwarding tanpa memanggil update_item_visual
-=======
 		elif is_attachment:
+			# Worn hats/held tools aren't shown directly. Keep one hat + one tool max,
+			# replacing any existing attachment of the same category.
 			var new_is_hat: bool = target_node.get("item_kind") in ["hat", "role"]
 			for child in container.get_children():
 				if child == target_node:
@@ -173,13 +179,13 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 				if child_is_hat == new_is_hat:
 					child.queue_free()
 
+	# Refresh the character that just received (or lost) an attachment.
 	var new_owner := _owning_character(container)
 	if new_owner:
 		new_owner.update_item_visual()
 	if old_owner and old_owner != new_owner:
 		old_owner.update_item_visual.call_deferred()
 
->>>>>>> Stashed changes
 	if target_node.get("item_kind") == "character" and target_node.get_parent() != $ItemTray:
 		var attachments := target_node.get_node_or_null("Attachments")
 		if attachments:
@@ -196,7 +202,7 @@ func _drop_to_container(_at_pos: Vector2, data: Variant, container: Node) -> voi
 	_refresh_all_visuals()
 
 
-# Fungsi pembantu baru untuk menyegarkan seluruh visual kamar, kondisi menang, dan efek komik secara sekuensial
+# Menyegarkan seluruh visual kamar, kondisi menang, dan efek komik secara sekuensial
 func _refresh_all_visuals() -> void:
 	for panel in $PanelGrid.get_children():
 		var holder = panel.get_node_or_null("ItemsHolder")
@@ -209,8 +215,7 @@ func _refresh_all_visuals() -> void:
 	_update_story_effects.call_deferred()
 
 
-<<<<<<< Updated upstream
-=======
+# Returns the character Panel that owns an Attachments container, or null.
 func _owning_character(node: Node) -> Node:
 	if node and node.name == "Attachments":
 		var owner_node := node.get_parent()
@@ -219,7 +224,6 @@ func _owning_character(node: Node) -> Node:
 	return null
 
 
->>>>>>> Stashed changes
 func _check_win() -> void:
 	var ok := 0
 	for i in 4:
@@ -233,24 +237,6 @@ func _panel_ok(idx: int) -> bool:
 		return false
 		
 	var holder := $PanelGrid.get_child(idx).get_node("ItemsHolder")
-<<<<<<< Updated upstream
-	match idx:
-		0:
-			return _has_role(holder, "nurse") and _has_anywhere(holder, "poison")
-		1:
-			return _has_role(holder, "doctor")
-		2:
-			return _has_role(holder, "detective")
-		3:
-			var nurse_char := _find_role(holder, "nurse")
-			return _has_role(holder, "detective") \
-				and nurse_char != null \
-				and _char_holds(nurse_char, "handcuff")
-	return false
-
-
-func _find_role(holder: Node, hat_id: String) -> Node:
-=======
 	for c in _level.panel_conditions[idx]:
 		var condition_type = c.get("type") if c is Dictionary else c.type
 		var role_id = c.get("role", "") if c is Dictionary else c.role
@@ -271,10 +257,13 @@ func _find_role(holder: Node, hat_id: String) -> Node:
 	return true
 
 
+# Finds a character in the holder wearing hat_id. If char_id is set, that
+# character's item_id must match it exactly.
 func _find_role(holder: Node, hat_id: String, char_id: String = "") -> Node:
->>>>>>> Stashed changes
 	for c in holder.get_children():
 		if c.get("item_kind") != "character":
+			continue
+		if char_id != "" and c.get("item_id") != char_id:
 			continue
 		var attachments := c.get_node_or_null("Attachments")
 		if attachments:
@@ -284,11 +273,7 @@ func _find_role(holder: Node, hat_id: String, char_id: String = "") -> Node:
 	return null
 
 
-func _has_role(holder: Node, hat_id: String) -> bool:
-	return _find_role(holder, hat_id) != null
-
-
-func _has_anywhere(holder: Node, item_id: String) -> bool:
+func _has_item_anywhere(holder: Node, item_id: String) -> bool:
 	for c in holder.get_children():
 		if c.get("item_id") == item_id:
 			return true

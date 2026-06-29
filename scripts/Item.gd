@@ -12,11 +12,7 @@ var is_dropped_in_room: bool = false
 @onready var tool_icon = $ToolIcon
 @onready var label = $Label
 
-<<<<<<< Updated upstream
-func _ready():
-	if label:
-		label.text = item_id.capitalize()
-=======
+# Maps a lowercase role/hat id to the actual file name in assets/hat/.
 const HAT_FILES := {
 	"doctor": "Doctor",
 	"nurse": "Nurse",
@@ -25,7 +21,6 @@ const HAT_FILES := {
 }
 
 func _ready() -> void:
->>>>>>> Stashed changes
 	update_item_visual()
 
 func update_item_visual() -> void:
@@ -34,21 +29,21 @@ func update_item_visual() -> void:
 	var c_left = get_node_or_null("CharacterContainer/CharLeft")
 	var t_icon = get_node_or_null("ToolIcon")
 	var default_bg = get_node_or_null("BG")
+	var lbl = get_node_or_null("Label")
 	var nama_kapital = item_id.capitalize()
 
-<<<<<<< Updated upstream
-	# Reset semua visibilitas awal
-=======
 	if lbl:
 		lbl.text = nama_kapital
 
->>>>>>> Stashed changes
 	if r_bg:
 		r_bg.visible = false
 		r_bg.texture = null
-	if c_container: c_container.visible = false
-	if t_icon: t_icon.visible = false
-	if default_bg: default_bg.visible = true
+	if c_container:
+		c_container.visible = false
+	if t_icon:
+		t_icon.visible = false
+	if default_bg:
+		default_bg.visible = true
 	self.self_modulate = Color(1, 1, 1, 1)
 
 	match item_kind:
@@ -59,39 +54,17 @@ func update_item_visual() -> void:
 				r_bg.texture = load(path)
 				r_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				r_bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-				r_bg.size_flags_horizontal = Control.SIZE_FILL
-				r_bg.size_flags_vertical = Control.SIZE_FILL
 				r_bg.visible = true
-			if default_bg: default_bg.visible = false
 
 		"character":
 			if c_container and c_left:
 				c_container.visible = true
-				c_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 				c_left.visible = true
 				c_left.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-				c_left.size_flags_horizontal = Control.SIZE_FILL
-				c_left.size_flags_vertical = Control.SIZE_FILL
 				c_left.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-				if default_bg: default_bg.visible = false
+				c_left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				c_left.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
-<<<<<<< Updated upstream
-				if not is_dropped_in_room:
-					c_left.custom_minimum_size = Vector2(80, 80)
-					var path_char = "res://assets/characters/" + nama_kapital + ".png"
-					if ResourceLoader.exists(path_char):
-						c_left.texture = load(path_char)
-					else:
-						push_error("Texture tidak ditemukan: " + path_char)
-				else:
-					c_left.custom_minimum_size = Vector2(80, 80)
-					var path_trans = "res://assets/characters/" + nama_kapital + "-trans.png"
-					if ResourceLoader.exists(path_trans):
-						c_left.texture = load(path_trans)
-					else:
-						push_error("Texture trans tidak ditemukan: " + path_trans)
-					if r_bg: r_bg.visible = false
-=======
 				var tex_path := ""
 				if is_dropped_in_room:
 					var ra: Array = _get_variant_role_action()
@@ -121,26 +94,16 @@ func update_item_visual() -> void:
 						
 				if tex_path != "":
 					c_left.texture = load(tex_path)
->>>>>>> Stashed changes
 
 		"role", "hat":
-			if t_icon:
-				var path_icon = "res://assets/roles/" + item_id + ".png"
-				if ResourceLoader.exists(path_icon):
-					t_icon.texture = load(path_icon)
-					t_icon.visible = true
+			var file_name: String = HAT_FILES.get(item_id, item_id.capitalize())
+			_show_full_icon(r_bg, "res://assets/hat/" + file_name + ".png")
 
 		"tool", "item":
-<<<<<<< Updated upstream
-			if t_icon:
-				var path_icon = "res://assets/tools/" + item_id + ".png"
-				if ResourceLoader.exists(path_icon):
-					t_icon.texture = load(path_icon)
-					t_icon.visible = true
-=======
 			_show_full_icon(r_bg, "res://assets/item/" + nama_kapital + ".png")
 
 
+# Shows an icon centered and scaled to fit, filling the whole item rect.
 func _show_full_icon(r_bg: TextureRect, path: String) -> void:
 	if r_bg and ResourceLoader.exists(path):
 		r_bg.texture = load(path)
@@ -149,6 +112,8 @@ func _show_full_icon(r_bg: TextureRect, path: String) -> void:
 		r_bg.visible = true
 
 
+# Picks the sprite [Role, Action] from the worn hat AND the held item, so a
+# nurse holding poison reads differently from a nurse holding handcuffs.
 func _get_variant_role_action() -> Array:
 	var attachments := get_node_or_null("Attachments")
 	if not attachments:
@@ -215,4 +180,3 @@ func _is_nurse_with_poison() -> bool:
 			has_poison = true
 			
 	return has_nurse_hat and has_poison
->>>>>>> Stashed changes

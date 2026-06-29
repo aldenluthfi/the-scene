@@ -30,8 +30,8 @@ func _build_grid() -> void:
 		if Levels.is_unlocked(i):
 			btn.text = "%d\n%s" % [i + 1, Levels.level_name(i)]
 			btn.disabled = false
-			# Menggunakan callable lambda/bind yang aman di Godot 4
-			btn.pressed.connect(func(): _on_level_pressed(i))
+			# Menggunakan bind bawaan Godot 4 yang bersih dan optimal
+			btn.pressed.connect(_on_level_pressed.bind(i))
 		else:
 			btn.text = "🔒\n%d" % (i + 1)
 			btn.disabled = true
